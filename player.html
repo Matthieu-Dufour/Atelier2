@@ -6,31 +6,53 @@
     <title>GeoQuizz</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
     <script src="https://unpkg.com/axios@0.18.0/dist/axios.js"></script>
+    
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+   
+    <style>
+        #map { 
+            height: 180px; 
+            }
+    </style>
+
 </head>
 
 <body>
     <div id="application">
         <h1>GeoQuizz</h1>
         
+        <!--AFFICHAGE DU JEU-->
         <section v-if="isStarted">
+            <!--PARTIE EN COURS-->
             <div v-if="this.compteurPhotos < 11">
                 <photos 
                     v-bind:urlphoto="listePhotos[compteurPhotos]"
                     v-on:valider="validChoice">
                 </photos>
+                <div id="map"></div>
+                
                 <p>Votre score: {{this.score}}</p>
                 <div v-if="this.time > 0">
                         <h1>Timer</h1>
                         <p>{{this.time}} secondes restantes</p>
                 </div>
+                <!--PARTIE TERMINEE-->
                 <div v-else>
                         <h1>Timer</h1>
                         <p>Temps écoulé, t'auras pas les points CHEH !</p>
                 </div>
 
             </div>
+
+            <div v-else>
+                <p>Partie terminée</p>
+                <p>votre score est de {{this.score}}, voulez-vous l'enregistrer ?</p>
+                <button v-on:click="saveScore">Oui</button>
+                <button v-on:click="backHome">Non</button>
+            </div>
         </section>
 
+        <!--HOME-->
         <section v-else>
             <p v-if="errors.length">
                 <b>Please correct the following error(s):</b>
@@ -53,6 +75,60 @@
 
     <script src="player-component.js"></script>
     <script src="player.js"></script>
+    <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script>
+    <script>
+    
+        var mymap = L.map('map').setView([51.505, -0.09], 13);
+
+        L.tileLayer('http://korona.geog.uni-heidelberg.de/tiles/roads/x={x}&y={y}&z={z}', {
+        //attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+        maxZoom: 18,
+        id: 'mapbox.streets',
+        //accessToken: 'your.mapbox.access.token'
+        }).addTo(mymap);
+    
+        var marker = L.marker([51.5, -0.09]).addTo(mymap);
+
+        var circle = L.circle([51.508, -0.11], {
+        color: 'red',
+        fillColor: '#f03',
+        fillOpacity: 0.5,
+        radius: 500
+        }).addTo(mymap);
+
+        var polygon = L.polygon([
+        [51.509, -0.08],
+        [51.503, -0.06],
+        [51.51, -0.047]
+        ]).addTo(mymap);
+
+        marker.bindPopup("<b>Hello world!</b><br>I am a popup.").openPopup();
+        circle.bindPopup("I am a circle.");
+        polygon.bindPopup("I am a polygon.");
+
+        var popup = L.popup()
+        .setLatLng([51.5, -0.09])
+        .setContent("I am a standalone popup.")
+        .openOn(mymap);
+
+        function onMapClick(e) {
+            alert("You clicked the map at " + e.latlng);
+        }
+
+        mymap.on('click', onMapClick);
+
+        var popup = L.popup();
+
+        function onMapClick(e) {
+            popup
+            .setLatLng(e.latlng)
+            .setContent("You clicked the map at " + e.latlng.toString())
+            .openOn(mymap);
+        }
+
+        mymap.on('click', onMapClick)
+
+    </script>
 
 </body>
 

@@ -64,6 +64,7 @@
                     e.preventDefault();
                 },
                 
+                //Créer et lance la partie
                 startGame(){
                     this.time = 20
                     this.startTimer()
@@ -78,6 +79,7 @@
                     })*/
                 },
 
+                //Valide la réponse du joueur
                 validChoice(){
                     this.time = 20
                     if(this.compteurPhotos  < 11){
@@ -87,6 +89,7 @@
                     }
                 },
 
+                //Met à jour le score du joueur
                 calculScore(){
                     if(this.reponse < this.listePhotos[this.compteurPhotos].dist){
                         points = 5
@@ -138,10 +141,21 @@
                     }
                 },
 
+                //Déroulement du jeu
                 play(){
 
                 },
 
+                //Retour au menu de sélection
+                backHome(){
+                    this.isStarted = false
+                },
+
+                //Sauvegarde le score du joueur
+                saveScore(){
+
+                    this.backHome()
+                },
 
                 //GESTION DU TIMER
                 startTimer () {
@@ -163,5 +177,9 @@
 
 
             },
+
+
+
+            
 
         });
