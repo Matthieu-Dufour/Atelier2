@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>GeoQuizz</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios@0.18.0/dist/axios.js"></script>
+</head>
+
+<body>
+    <div id="application">
+        <h1>GeoQuizz</h1>
+        
+        <section v-if="isStarted">
+            <div v-if="this.compteurPhotos < 11">
+                <photos 
+                    v-bind:urlphoto="listePhotos[compteurPhotos]"
+                    v-on:valider="validChoice">
+                </photos>
+                <p>Votre score: {{this.score}}</p>
+                <div v-if="this.time > 0">
+                        <h1>Timer</h1>
+                        <p>{{this.time}} secondes restantes</p>
+                </div>
+                <div v-else>
+                        <h1>Timer</h1>
+                        <p>Temps écoulé, t'auras pas les points CHEH !</p>
+                </div>
+
+            </div>
+        </section>
+
+        <section v-else>
+            <p v-if="errors.length">
+                <b>Please correct the following error(s):</b>
+                <ul>
+                    <li v-for="error in errors">{{ error }}</li>
+                </ul>
+            </p>
+            <p>
+                <label for="pseudo">Entrez votre pseudo</label>
+                <br>
+                <input type="text" name="pseudo" v-model="pseudo">
+            </p>                
+            <series v-bind:nbseries="listeSeries"></series>
+            <p>
+            <button v-on:click="startGame">Lancer la partie</button>
+            </p>
+        </section>
+
+    </div>
+
+    <script src="player-component.js"></script>
+    <script src="player.js"></script>
+
+</body>
+
+</html>
