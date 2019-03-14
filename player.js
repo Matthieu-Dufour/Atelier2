@@ -78,7 +78,7 @@
             },
 
             methods:{
-
+                //MAP
                 initMap() {
                     this.map = L.map('map').setView([38.63, -90.23], 12);
         
@@ -94,7 +94,21 @@
                 },
         
                 initLayers() {
-        
+                    //affichage position du clic
+                },
+                //test
+                someMethod(event) {
+                    // clientX/Y gives the coordinates relative to the viewport in CSS pixels.
+                    console.log(event.clientX); // x coordinate
+                    console.log(event.clientY); // y coordinate
+            
+                    // pageX/Y gives the coordinates relative to the <html> element in CSS pixels.
+                    console.log(event.pageX); 
+                    console.log(event.pagey); 
+            
+                    // screenX/Y gives the coordinates relative to the screen in device pixels.
+                    console.log(event.screenX);
+                    console.log(event.screenY);
                 },
 
                 

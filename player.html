@@ -5,22 +5,13 @@
     <title>GeoQuizz</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
-    <script src="https://unpkg.com/axios@0.18.0/dist/axios.js"></script> -->
+
    
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
     <script src="https://unpkg.com/leaflet@1.2.0/dist/leaflet.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.0.0-beta/css/bootstrap.min.css">  
     <link rel="stylesheet" href="player.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css">
-
-    <!-- <style>
-        #map { 
-            height:400px; 
-            width: 400px;
-            }
-    </style>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/> -->
 
 </head>
 
@@ -80,7 +71,7 @@
         <div v-show="isStarted && this.compteurPhotos < 11" class="row">
                 <div class="col-md-9">
                         <!-- The map goes here -->
-                    <div id="map" class="map"></div>
+                    <div id="map" class="map" v-on:click="someMethod"></div>
                 </div>
         </div>
 
@@ -88,8 +79,6 @@
 </body>
     <script src="player-component.js"></script>
     <script src="player.js"></script>
-    <!-- <script src="https://unpkg.com/leaflet@1.4.0/dist/leaflet.js" integrity="sha512-QVftwZFqvtRNi0ZyCtsznlKSWOStnDORoefr1enyq5mVL4tmKB3S/EnC3rRJcxCPavG10IcrVGSmPh6Qw5lwrg==" crossorigin=""></script> -->
-
 
 
 </html>
