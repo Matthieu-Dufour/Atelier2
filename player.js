@@ -1,4 +1,3 @@
-   
         var app = new Vue({
             el:"#application",
             
@@ -43,7 +42,7 @@
                     }
                 ],
                 score: 0,
-                reponse: 0,
+                //reponse: e.latlng.toString(),
                 timer: 0,
 
                 //TIMER
@@ -51,10 +50,53 @@
 		        minutes:0,
 		        secondes:0,
 		        time:20,
-		        timer:null,
+                timer:null,
+
+                //MAP
+                map: null,
+                tileLayer: null,
+                layers: [
+                    {
+                        id: 0,
+                        name: 'Restaurants',
+                        active: false,
+                        features: [
+                            {
+                            id: 0,
+                            name: 'Bogart\'s Smokehouse',
+                            type: 'marker',
+                            coords: [38.6109607, -90.2050322],
+                            }
+                        ],
+                    },
+                ],
+            },
+
+            mounted() { /* Code to run when app is mounted */ 
+                this.initMap();
+                this.initLayers();
             },
 
             methods:{
+
+                initMap() {
+                    this.map = L.map('map').setView([38.63, -90.23], 12);
+        
+                    this.tileLayer = L.tileLayer(
+                      'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
+                      {
+                        maxZoom: 18,
+                        attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
+                      }
+                    );
+                    
+                    this.tileLayer.addTo(this.map);
+                },
+        
+                initLayers() {
+        
+                },
+
                 
                 checkForm:function(e) {
                     if(this.pseudo && this.serie) return true;
@@ -77,6 +119,11 @@
                     .catch(e => {
                         this.errors.push(e)
                     })*/
+                },
+
+                //Déroulement du jeu
+                play(){    
+                    
                 },
 
                 //Valide la réponse du joueur
@@ -141,11 +188,6 @@
                     }
                 },
 
-                //Déroulement du jeu
-                play(){
-
-                },
-
                 //Retour au menu de sélection
                 backHome(){
                     this.isStarted = false
@@ -177,9 +219,5 @@
 
 
             },
-
-
-
-            
 
         });

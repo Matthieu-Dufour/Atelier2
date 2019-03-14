@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>GeoQuizz</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.22/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios@0.18.0/dist/axios.js"></script>
+   
+    <style>
+html, body, #app {
+  height: 100%;
+  margin: 0;
+}
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.4.0/dist/leaflet.css" integrity="sha512-puBpdR0798OZvTTbP4A8Ix/l+A4dHDD0DGqYW6RQ+9jxkRFclaxxQb/SJAWZfWAkuyeQUytO7+7N4QKrDh+drA==" crossorigin=""/>
+
+</head>
+
+<body>
+        <div id="app">
+          <v-map :zoom="zoom" :center="center">
+            <v-tilelayer :url="url" :attribution="attribution"></v-tilelayer>
+            <v-marker :lat-lng="marker"></v-marker>
+              <v-marker v-for="item in markers" :key="item.id" :lat-lng="item.latlng" @l-add="$event.target.openPopup()">
+                <v-popup :content="item.content"></v-popup>
+              </v-marker>
+          </v-map>
+        </div>
+
+      <script>
+        import * as Vue2Leaflet from 'vue2-leaflet' // VALID
+        import {LMap, LTileLayer, LMarker} from 'vue2-leaflet'
+
+        Vue.component('v-map', Vue2Leaflet.Map);
+        Vue.component('v-tilelayer', Vue2Leaflet.TileLayer);
+        Vue.component('v-marker', Vue2Leaflet.Marker);
+        Vue.component('v-popup', Vue2Leaflet.Popup);
+
+        new Vue({
+            el: '#app',
+            data() {
+                return {
+                    zoom: 13,
+                    center: [47.413220, -1.219482],
+                    url: 'http://{s}.tile.osm.org/{z}/{x}/{y}.png',
+                    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
+                    marker: L.latLng(47.413220, -1.219482),
+
+                    markers: []
+                }
+            },
+
+            mounted () {
+  	            window.setTimeout( () => {
+                this.markers.push({
+                    id: 1,
+                    latlng: L.latLng(47.417220, -1.222482),
+                    content: 'Hi! this is my popup data'
+                });
+            }, 1000);
+      
+  	        window.setTimeout( () => {
+                this.markers.push({
+                    id: 2,
+                    latlng: L.latLng(47.417220, -1.25),
+                    content: 'Another'
+                });
+            }, 2000);
+        }
+    });
+
+    </script>
+    </body>
+</html>
