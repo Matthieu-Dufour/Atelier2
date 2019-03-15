@@ -42,7 +42,7 @@
                     }
                 ],
                 score: 0,
-                //reponse: e.latlng.toString(),
+                click: '',
                 timer: 0,
 
                 //TIMER
@@ -74,7 +74,6 @@
 
             mounted() { /* Code to run when app is mounted */ 
                 this.initMap();
-                this.initLayers();
             },
 
             methods:{
@@ -93,24 +92,13 @@
                     this.tileLayer.addTo(this.map);
                 },
         
-                initLayers() {
+                getClick() {
                     //affichage position du clic
+                    this.map.on('click', function (e) {
+                        this.click= e.latlng.lat + ", " + e.latlng.lng;
+                        console.log(this.click)
+                    })
                 },
-                //test
-                someMethod(event) {
-                    // clientX/Y gives the coordinates relative to the viewport in CSS pixels.
-                    console.log(event.clientX); // x coordinate
-                    console.log(event.clientY); // y coordinate
-            
-                    // pageX/Y gives the coordinates relative to the <html> element in CSS pixels.
-                    console.log(event.pageX); 
-                    console.log(event.pagey); 
-            
-                    // screenX/Y gives the coordinates relative to the screen in device pixels.
-                    console.log(event.screenX);
-                    console.log(event.screenY);
-                },
-
                 
                 checkForm:function(e) {
                     if(this.pseudo && this.serie) return true;
@@ -152,7 +140,7 @@
 
                 //Met à jour le score du joueur
                 calculScore(){
-                    if(this.reponse < this.listePhotos[this.compteurPhotos].dist){
+                    if(this.click < this.listePhotos[this.compteurPhotos].dist){
                         points = 5
                         if(this.time >= 15){
                             point *= 4
@@ -168,7 +156,7 @@
                         }
                         this.score += points
                     }
-                    if(this.reponse < (this.listePhotos[this.compteurPhotos].dist)*2){
+                    if(this.click < (this.listePhotos[this.compteurPhotos].dist)*2){
                         points = 3
                         if(this.time >= 15){
                             point *= 4
@@ -184,7 +172,7 @@
                         }
                         this.score += points
                     }
-                    if(this.reponse < (this.listePhotos[this.compteurPhotos].dist)*3){
+                    if(this.click < (this.listePhotos[this.compteurPhotos].dist)*3){
                         points = 1
                         if(this.time >= 15){
                             point *= 4
