@@ -4,13 +4,13 @@ Vue.component('series', {
         `
         <p>
         <label for="serie">Choisissez une série</label>
-        <select name="serie">
+        <select name="serie" @change="getcity($event)" v-model="serie">
             <option v-for="s in nbseries" :value="s.id">{{s.ville}}</option>
         </select>
         </p>
         `,
 
-        props:['nbseries'],
+        props:['nbseries', 'selected']
         
 })
 
