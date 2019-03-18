@@ -1,6 +1,5 @@
 /*------------------------------------------------------------------------COMPONENTS------------------------------------------------------------------------------------------*/
 Vue.component('series', {
-
     data:function(){
         return {
             idSerie: '',
@@ -13,31 +12,27 @@ Vue.component('series', {
         },
     },
     template:
-    `
-    <p>
-    <label for="serie">Choisissez une série</label>
-    <select name="serie" @change="getIDCity($event)" v-model="idSerie">
-        <option disabled value="">Choisissez</option>
-        <option v-for="s in nbseries" :value="s.id">{{s.ville}}</option>
-    </select>
-    </p>
-    `,
-
-    props:['nbseries', 'selected']
-    
+        `
+        <p>
+        <label for="serie">Choisissez une série</label>
+        <select name="serie" @change="getIDCity($event)" v-model="idSerie">
+            <option disabled value="">Choisissez</option>
+            <option v-for="s in nbseries" :value="s.id">{{s.ville}}</option>
+        </select>
+        </p>
+        `,
+        props:['nbseries', 'selected']    
 })
 
 Vue.component('photos', {
-template:
-`
-<div>
-    <img :src="urlphoto.url">
-    <button v-on:click="$emit('valider')">Valider</button>
-</div>
-`,
-
-props:['urlphoto'],
-
+    template:
+        `
+        <div>
+            <img :src="urlphoto.url">
+            <button v-on:click="$emit('valider')">Valider</button>
+        </div>
+        `,
+    props:['urlphoto'],
 })
 
 
@@ -45,7 +40,7 @@ props:['urlphoto'],
 
 var app = new Vue({
     el:"#application",
-            
+       
     data : {
         errors:[],
         pseudo:null,
@@ -56,18 +51,18 @@ var app = new Vue({
         errorText: '',
         isStarted: false,
         listeSeries: [
-            {
-                "id":"1",
-                "ville":"Nancy", 
-                "map_ref":"1",
-                "dist":"1"
-            },
-            {
-                "id":"2",
-                "ville":"Reims", 
-                "map_ref":"2",
-                "dist":"1"
-            }
+            // {
+            //     "id":"1",
+            //     "ville":"Nancy", 
+            //     "map_ref":"1",
+            //     "dist":"1"
+            // },
+            // {
+            //     "id":"2",
+            //     "ville":"Reims", 
+            //     "map_ref":"2",
+            //     "dist":"1"
+            // }
         ],
         
         compteurPhotos: 0,
@@ -86,7 +81,7 @@ var app = new Vue({
             }
         ],
         
-        serie: '',
+        seriePlayed: '',
         selected: '',
         score: 0,
         click: '',
@@ -120,6 +115,7 @@ var app = new Vue({
     },
 
     mounted() { /* Code to run when app is mounted */ 
+        this.getAllSeries();
         this.initMap();
     },
 
@@ -135,13 +131,13 @@ var app = new Vue({
                 attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
               }
             );
-            
             this.tileLayer.addTo(this.map);
             this.map.dragging.disable();
             this.map.touchZoom.disable();
             this.map.doubleClickZoom.disable();
             this.map.scrollWheelZoom.disable();
         },
+
             
         getClick() {
             //affichage position du clic
@@ -159,13 +155,36 @@ var app = new Vue({
             e.preventDefault();
         },
 
-
-
-        getSerie(){
+        getAllSeries(){
             axios
-            .get('' + this.serieName)
+            .get('http://localhost:8081/series', 
+                {headers: 
+                    {'Access-Control-Allow-Origin': 'http://localhost:8081/series' }
+                }
+            )
             .then(response => {
-                this.serie = response
+                this.listeSeries = response.data
+            })
+            .catch(error => {
+                this.errored = true
+                this.errorText = error
+            })
+            .finally(() => {
+                //Cette méthode est appelée quand le callback d'une promise est éxécuté : resolve ou reject peu importe.
+                // Cela évite de dupliquer le traitement dans le .then et dans le .catch
+                this.loading = false
+            })
+        },
+
+        getSeriePlayed(){
+            axios
+            .get('http://localhost:8081/series' + this.idSerie, 
+                {headers: 
+                    {'Access-Control-Allow-Origin': 'http://localhost:8081/series' }
+                }
+            )
+            .then(response => {
+                this.seriePlayed = response.data
             })
             .catch(error => {
                 this.errored = true
@@ -182,8 +201,9 @@ var app = new Vue({
         startGame(){
             this.time = 20
             this.startTimer()
-            console.log(this.serie)
+            console.log(this.seriePlayed)
             this.isStarted = true
+            
            /*axios.post(``, {
                 body: this.postBody
             })
@@ -191,11 +211,6 @@ var app = new Vue({
             .catch(e => {
                 this.errors.push(e)
             })*/
-        },
-
-        //Déroulement du jeu
-        play(){    
-            
         },
 
         //Valide la réponse du joueur
@@ -206,6 +221,9 @@ var app = new Vue({
                 this.calculScore()
                 this.startTimer()
             }
+            this.map.remove()
+            setTimeout(this.initMap(), 1)
+            console.log("MAP : " + this.map)
         },
 
         //Met à jour le score du joueur
