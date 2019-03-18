@@ -1,14 +1,15 @@
 /*------------------------------------------------------------------------COMPONENTS------------------------------------------------------------------------------------------*/
 Vue.component('series', {
-    data:function(){
+    data: function () {
         return {
             idSerie: '',
         }
     },
-    methods:{
-        getIDCity(event){
+    methods: {
+        getIDCity(event) {
             this.idSerie = event.target.value;
             console.log(this.idSerie)
+            this.$emit("getidserie", this.idSerie)
         },
     },
     template:
@@ -21,7 +22,7 @@ Vue.component('series', {
         </select>
         </p>
         `,
-        props:['nbseries', 'selected']    
+    props: ['nbseries', 'selected']
 })
 
 Vue.component('photos', {
@@ -32,20 +33,20 @@ Vue.component('photos', {
             <button v-on:click="$emit('valider')">Valider</button>
         </div>
         `,
-    props:['urlphoto'],
+    props: ['urlphoto'],
 })
 
 
 /*-----------------------------------------------------------------------INSTANCE DE VUE--------------------------------------------------------------------------------------*/
 
 var app = new Vue({
-    el:"#application",
-       
-    data : {
-        errors:[],
-        pseudo:null,
-        age:null,
-        
+    el: "#application",
+
+    data: {
+        errors: [],
+        pseudo: null,
+        age: null,
+
         loading: true,
         errored: false,
         errorText: '',
@@ -64,72 +65,72 @@ var app = new Vue({
             //     "dist":"1"
             // }
         ],
-        
+
         compteurPhotos: 0,
         listePhotos: [
             {
-                "id":"1",
-                "desc":"ça existe",
-                "position":"ici",
-                "url":"BD.png"
+                "id": "1",
+                "desc": "ça existe",
+                "position": "ici",
+                "url": "BD.png"
             },
             {
-                "id":"2",
-                "desc":"ça existe",
-                "position":"ici",
-                "url":"nativescript1.png"
+                "id": "2",
+                "desc": "ça existe",
+                "position": "ici",
+                "url": "nativescript1.png"
             }
         ],
-        
+
         seriePlayed: '',
         selected: '',
         score: 0,
         click: '',
         timer: 0,
-        
+
         //TIMER
         isRunning: false,
-		minutes:0,
-		secondes:0,
-		time:20,
-        timer:null,
-        
+        minutes: 0,
+        secondes: 0,
+        time: 20,
+        timer: null,
+
         //MAP
         map: null,
         tileLayer: null,
         layers: [
             {
-            // id: 0,
-            // name: 'Restaurants',
-            // active: false,
-            // features: [
-            //     {
-            //     id: 0,
-            //     name: 'Bogart\'s Smokehouse',
-            //     type: 'marker',
-            //     coords: [38.6109607, -90.2050322],
-            //     }
-            // ],
+                // id: 0,
+                // name: 'Restaurants',
+                // active: false,
+                // features: [
+                //     {
+                //     id: 0,
+                //     name: 'Bogart\'s Smokehouse',
+                //     type: 'marker',
+                //     coords: [38.6109607, -90.2050322],
+                //     }
+                // ],
             },
         ],
     },
 
-    mounted() { /* Code to run when app is mounted */ 
+    mounted() { /* Code to run when app is mounted */
         this.getAllSeries();
         this.initMap();
     },
 
-    methods:{
+    methods: {
         //MAP
         initMap() {
-            this.map = L.map('map', {zoomControl:false}).setView([38.63, -90.23], 12);
-        
+            this.map = L.map('map', { zoomControl: false }).setView([38.63, -90.23], 12);
+
             this.tileLayer = L.tileLayer(
-              'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
-              {
-                maxZoom: 18,
-                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
-              }
+                'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
+                {
+                    maxZoom: 18,
+                    attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attribution">CARTO</a>',
+                }
             );
             this.tileLayer.addTo(this.map);
             this.map.dragging.disable();
@@ -138,86 +139,101 @@ var app = new Vue({
             this.map.scrollWheelZoom.disable();
         },
 
-            
+        getIdSerie(id){
+            this.seriePlayed = id
+            console.log(this.seriePlayed)
+        },
+
+
         getClick() {
             //affichage position du clic
             this.map.on('click', function (e) {
-                this.click= e.latlng.lat + ", " + e.latlng.lng;
+                this.click = e.latlng.lat + ", " + e.latlng.lng;
                 console.log(this.click)
             })
         },
-                
-        checkForm:function(e) {
-            if(this.pseudo && this.serie) return true;
+
+        checkForm: function (e) {
+            if (this.pseudo && this.serie) return true;
             this.errors = [];
-            if(!this.pseudo) this.errors.push("Un pseudo est requis.");
-            if(!this.serie) this.errors.push("Veuillez choisir une série.");
+            if (!this.pseudo) this.errors.push("Un pseudo est requis.");
+            if (!this.serie) this.errors.push("Veuillez choisir une série.");
             e.preventDefault();
         },
 
-        getAllSeries(){
+        getAllSeries() {
             axios
-            .get('http://localhost:8081/series', 
-                {headers: 
-                    {'Access-Control-Allow-Origin': 'http://localhost:8081/series' }
-                }
-            )
-            .then(response => {
-                this.listeSeries = response.data
-            })
-            .catch(error => {
-                this.errored = true
-                this.errorText = error
-            })
-            .finally(() => {
-                //Cette méthode est appelée quand le callback d'une promise est éxécuté : resolve ou reject peu importe.
-                // Cela évite de dupliquer le traitement dans le .then et dans le .catch
-                this.loading = false
-            })
+                .get('http://localhost:8081/series',
+                    {
+                        headers:
+                            { 'Access-Control-Allow-Origin': 'http://localhost:8081/series' }
+                    }
+                )
+                .then(response => {
+                    this.listeSeries = response.data
+                })
+                .catch(error => {
+                    this.errored = true
+                    this.errorText = error
+                })
+                .finally(() => {
+                    //Cette méthode est appelée quand le callback d'une promise est éxécuté : resolve ou reject peu importe.
+                    // Cela évite de dupliquer le traitement dans le .then et dans le .catch
+                    this.loading = false
+                })
         },
 
-        getSeriePlayed(){
+        getSeriePlayed() {
             axios
-            .get('http://localhost:8081/series' + this.idSerie, 
-                {headers: 
-                    {'Access-Control-Allow-Origin': 'http://localhost:8081/series' }
-                }
-            )
-            .then(response => {
-                this.seriePlayed = response.data
-            })
-            .catch(error => {
-                this.errored = true
-                this.errorText = error
-            })
-            .finally(() => {
-                //Cette méthode est appelée quand le callback d'une promise est éxécuté : resolve ou reject peu importe.
-                // Cela évite de dupliquer le traitement dans le .then et dans le .catch
-                this.loading = false
-            })
+                .get('http://localhost:8081/series' + this.seriePlayed,
+                    {
+                        headers:
+                            { 'Access-Control-Allow-Origin': 'http://localhost:8081/series' }
+                    }
+                )
+                .then(response => {
+                    this.seriePlayed = response.data
+                })
+                .catch(error => {
+                    this.errored = true
+                    this.errorText = error
+                })
+                .finally(() => {
+                    //Cette méthode est appelée quand le callback d'une promise est éxécuté : resolve ou reject peu importe.
+                    // Cela évite de dupliquer le traitement dans le .then et dans le .catch
+                    this.loading = false
+                })
         },
-                
+
         //Créer et lance la partie
-        startGame(){
+        startGame() {
             this.time = 20
             this.startTimer()
             console.log(this.seriePlayed)
             this.isStarted = true
-            
-           /*axios.post(``, {
-                body: this.postBody
-            })
-            .then(response => {console.log("un mot")})
-            .catch(e => {
-                this.errors.push(e)
-            })*/
+
+            axios
+                .post('http://localhost:8080/partie/' + this.seriePlayed,
+                    {
+                        joueur: "test",
+                    },
+                    {
+                        headers:
+                            { 'Content-Type': 'application/json' },
+                    })
+                .then(response => {
+                    console.log("partie créée")
+                })
+                .catch(e => {
+                    this.errors.push(e)
+                })
         },
 
         //Valide la réponse du joueur
-        validChoice(){
+        validChoice() {
             this.time = 20
-            if(this.compteurPhotos  < 11){
-                this.compteurPhotos ++
+            if (this.compteurPhotos < 11) {
+                this.compteurPhotos++
                 this.calculScore()
                 this.startTimer()
             }
@@ -227,51 +243,51 @@ var app = new Vue({
         },
 
         //Met à jour le score du joueur
-        calculScore(){
-            if(this.click < this.listePhotos[this.compteurPhotos].dist){
+        calculScore() {
+            if (this.click < this.listePhotos[this.compteurPhotos].dist) {
                 points = 5
-                if(this.time >= 15){
+                if (this.time >= 15) {
                     point *= 4
                 }
-                else if((this.time > 15) && (this.time >= 10)){
+                else if ((this.time > 15) && (this.time >= 10)) {
                     point *= 2
                 }
-                else if((this.time > 10) && (this.time >= 20)){
+                else if ((this.time > 10) && (this.time >= 20)) {
                     point *= 1
                 }
-                else if(this.time <= 0){
+                else if (this.time <= 0) {
                     points = 0
                 }
                 this.score += points
             }
-            if(this.click < (this.listePhotos[this.compteurPhotos].dist)*2){
+            if (this.click < (this.listePhotos[this.compteurPhotos].dist) * 2) {
                 points = 3
-                if(this.time >= 15){
+                if (this.time >= 15) {
                     point *= 4
                 }
-                else if((this.time > 15) && (this.time >= 10)){
+                else if ((this.time > 15) && (this.time >= 10)) {
                     point *= 2
                 }
-                else if((this.time > 10) && (this.time >= 20)){
+                else if ((this.time > 10) && (this.time >= 20)) {
                     point *= 1
                 }
-                else if(this.time <= 0){
+                else if (this.time <= 0) {
                     points = 0
                 }
                 this.score += points
             }
-            if(this.click < (this.listePhotos[this.compteurPhotos].dist)*3){
+            if (this.click < (this.listePhotos[this.compteurPhotos].dist) * 3) {
                 points = 1
-                if(this.time >= 15){
+                if (this.time >= 15) {
                     point *= 4
                 }
-                else if((this.time > 15) && (this.time >= 10)){
+                else if ((this.time > 15) && (this.time >= 10)) {
                     point *= 2
                 }
-                else if((this.time > 10) && (this.time >= 20)){
+                else if ((this.time > 10) && (this.time >= 20)) {
                     point *= 1
                 }
-                else if(this.time <= 0){
+                else if (this.time <= 0) {
                     points = 0
                 }
                 this.score += points
@@ -279,31 +295,31 @@ var app = new Vue({
         },
 
         //Retour au menu de sélection
-        backHome(){
+        backHome() {
             this.isStarted = false
         },
 
         //Sauvegarde le score du joueur
-        saveScore(){
-            
+        saveScore() {
+
             this.backHome()
         },
 
         //GESTION DU TIMER
-        startTimer () {
-			this.isRunning = true
-			if (!this.timer) {
-				this.timer = setInterval( () => {
-				    if (this.time > 0) {
-				        this.time--
-				    }
-	            }, 1000 )
+        startTimer() {
+            this.isRunning = true
+            if (!this.timer) {
+                this.timer = setInterval(() => {
+                    if (this.time > 0) {
+                        this.time--
+                    }
+                }, 1000)
             }
         },
-                
+
     },
-            
-    computed:{
+
+    computed: {
         // emplacement ou effectue les calculs qu'on ferait quand l'événement onDOMReady est ok
 
     },

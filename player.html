@@ -61,7 +61,7 @@
                 <br>
                 <input type="text" name="pseudo" v-model="pseudo">
             </p>                
-            <series v-bind:nbseries="listeSeries" ></series>
+            <series v-bind:nbseries="listeSeries" v-on:getidserie="getIdSerie($event)"></series>
             <p>
             <button v-on:click="startGame">Lancer la partie</button>
             </p>
