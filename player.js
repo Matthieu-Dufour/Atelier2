@@ -82,6 +82,8 @@ var app = new Vue({
             }
         ],
 
+        token: '',
+        idPartie: '',
         seriePlayed: '',
         selected: '',
         score: 0,
@@ -139,7 +141,7 @@ var app = new Vue({
             this.map.scrollWheelZoom.disable();
         },
 
-        getIdSerie(id){
+        getIdSerie(id) {
             this.seriePlayed = id
             console.log(this.seriePlayed)
         },
@@ -222,7 +224,9 @@ var app = new Vue({
                             { 'Content-Type': 'application/json' },
                     })
                 .then(response => {
-                    console.log("partie créée")
+                    this.token = response.data.token
+                    this.idPartie = response.data.id
+                    console.log(this.token)
                 })
                 .catch(e => {
                     this.errors.push(e)
@@ -301,7 +305,19 @@ var app = new Vue({
 
         //Sauvegarde le score du joueur
         saveScore() {
-
+            axios
+                .put('http://localhost:8080/partie/' + this.idPartie,
+                {
+                    "score": "" + this.score
+                },
+                    {
+                        headers: { "Content-Type": "application/json" },
+                    })
+                    .then(response => {
+                    })
+                    .catch(e => {
+                        this.errors.push(e)
+                    })
             this.backHome()
         },
 
