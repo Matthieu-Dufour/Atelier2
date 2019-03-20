@@ -224,7 +224,7 @@ var app = new Vue({
 
         startGame() {
             console.log("over: "+this.over)
-            if (this.seriePlayed == null || this.pseudo == null) {
+            if (this.seriePlayed == '' || this.pseudo == null) {
                 this.erreur = true;
             }
             else {
