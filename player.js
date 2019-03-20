@@ -289,6 +289,7 @@ var app = new Vue({
 
         //Valide la réponse du joueur
         validChoice() {
+            this.mapMarker = null;
             this.time = 20;
             if (this.compteurPhotos < 10) {
                 this.compteurPhotos++;
@@ -326,13 +327,13 @@ var app = new Vue({
             if (L.GeometryUtil.length([this.click, this.photoPos]) < this.dist) {
                 points = 5
                 if (this.time >= 15) {
-                    point *= 4
+                    points *= 4
                 }
                 else if ((this.time > 15) && (this.time >= 10)) {
-                    point *= 2
+                    points *= 2
                 }
                 else if ((this.time > 10) && (this.time >= 20)) {
-                    point *= 1
+                    points *= 1
                 }
                 else if (this.time <= 0) {
                     points = 0
@@ -342,13 +343,13 @@ var app = new Vue({
             if ((L.GeometryUtil.length([this.click, this.photoPos]) > this.dist) && (L.GeometryUtil.length([this.click, this.photoPos]) < (this.dist * 2))) {
                 points = 3
                 if (this.time >= 15) {
-                    point *= 4
+                    points *= 4
                 }
                 else if ((this.time > 15) && (this.time >= 10)) {
-                    point *= 2
+                    points *= 2
                 }
                 else if ((this.time > 10) && (this.time >= 20)) {
-                    point *= 1
+                    points *= 1
                 }
                 else if (this.time <= 0) {
                     points = 0
@@ -358,13 +359,13 @@ var app = new Vue({
             if ((L.GeometryUtil.length([this.click, this.photoPos]) > (this.dist*2)) && (L.GeometryUtil.length([this.click, this.photoPos]) < (this.dist *3))) {
                 points = 1
                 if (this.time >= 15) {
-                    point *= 4
+                    points *= 4
                 }
                 else if ((this.time > 15) && (this.time >= 10)) {
-                    point *= 2
+                    points *= 2
                 }
                 else if ((this.time > 10) && (this.time >= 20)) {
-                    point *= 1
+                    points *= 1
                 }
                 else if (this.time <= 0) {
                     points = 0
@@ -380,18 +381,22 @@ var app = new Vue({
 
         //Sauvegarde le score du joueur
         saveScore() {
+            console.log("idPartie: " + this.id)
             axios
-                .put('http://localhost:8080/partie/' + this.idPartie,
+                .put('http://localhost:8080/partie/' + this.id,
                     {
-                        "score": "" + this.score
+                        "score": "" + this.score,
+                        "status": "stop"
                     },
                     {
                         headers: { "Content-Type": "application/json" /*, "token": this.token */ },
                     })
                 .then(response => {
+                    console.log("Score: " + this.score);
                 })
                 .catch(e => {
                     this.errors.push(e)
+                    console.log("erreur score: ", error)
                 })
             this.backHome()
         },
