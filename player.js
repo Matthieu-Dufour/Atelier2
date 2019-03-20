@@ -8,7 +8,7 @@ Vue.component('series', {
     methods: {
         getIDCity(event) {
             this.idSerie = event.target.value;
-            console.log(this.idSerie)
+            //console.log(this.idSerie)
             this.$emit("getidserie", this.idSerie)
         },
     },
@@ -51,20 +51,7 @@ var app = new Vue({
         errored: false,
         errorText: '',
         isStarted: false,
-        listeSeries: [
-            // {
-            //     "id":"1",
-            //     "ville":"Nancy", 
-            //     "map_ref":"1",
-            //     "dist":"1"
-            // },
-            // {
-            //     "id":"2",
-            //     "ville":"Reims", 
-            //     "map_ref":"2",
-            //     "dist":"1"
-            // }
-        ],
+        listeSeries: [],
 
         compteurPhotos: 0,
         listePhotos: [
@@ -81,7 +68,7 @@ var app = new Vue({
                 "url": "nativescript1.png"
             }
         ],
-
+        erreur: false,
         token: '',
         idPartie: '',
         seriePlayed: '',
@@ -98,34 +85,29 @@ var app = new Vue({
         timer: null,
 
         //MAP
+        lat1: '',
+        long1: '',
+        lat2: '',
+        long1: '',
+
         map: null,
         tileLayer: null,
         layers: [
             {
-                // id: 0,
-                // name: 'Restaurants',
-                // active: false,
-                // features: [
-                //     {
-                //     id: 0,
-                //     name: 'Bogart\'s Smokehouse',
-                //     type: 'marker',
-                //     coords: [38.6109607, -90.2050322],
-                //     }
-                // ],
+
             },
         ],
     },
 
     mounted() { /* Code to run when app is mounted */
         this.getAllSeries();
-        this.initMap();
+
     },
 
     methods: {
         //MAP
-        initMap() {
-            this.map = L.map('map', { zoomControl: false }).setView([38.63, -90.23], 12);
+        initMap(coord) {
+            this.map = L.map('map', { zoomControl: false }).fitBounds(coord);
 
             this.tileLayer = L.tileLayer(
                 'https://cartodb-basemaps-{s}.global.ssl.fastly.net/rastertiles/voyager/{z}/{x}/{y}.png',
@@ -143,7 +125,7 @@ var app = new Vue({
 
         getIdSerie(id) {
             this.seriePlayed = id
-            console.log(this.seriePlayed)
+            //console.log(this.seriePlayed)
         },
 
 
@@ -151,7 +133,7 @@ var app = new Vue({
             //affichage position du clic
             this.map.on('click', function (e) {
                 this.click = e.latlng.lat + ", " + e.latlng.lng;
-                console.log(this.click)
+                //console.log(this.click)
             })
         },
 
@@ -185,52 +167,126 @@ var app = new Vue({
                 })
         },
 
-        getSeriePlayed() {
-            axios
-                .get('http://localhost:8081/series' + this.seriePlayed,
-                    {
-                        headers:
-                            { 'Access-Control-Allow-Origin': 'http://localhost:8081/series' }
-                    }
-                )
-                .then(response => {
-                    this.seriePlayed = response.data
-                })
-                .catch(error => {
-                    this.errored = true
-                    this.errorText = error
-                })
-                .finally(() => {
-                    //Cette méthode est appelée quand le callback d'une promise est éxécuté : resolve ou reject peu importe.
-                    // Cela évite de dupliquer le traitement dans le .then et dans le .catch
-                    this.loading = false
-                })
+        partiePost(pseudo) {
+            let url = 'http://localhost:8080/partie/' + this.seriePlayed;
+            return new Promise(function (resolve, reject) {
+                console.log("pseudo: " + app.$data.pseudo);
+                axios
+                    .post(url,
+                        {
+                            joueur: "" + pseudo
+                        },
+                        {
+                            headers:
+                            {
+                                'Content-Type': 'application/json'
+                            }
+                        }
+                    )
+                    .then(response => {
+                        resolve(response);
+                    })
+                    .catch(error => {
+                        reject(error);
+                    })
+            })
         },
 
-        //Créer et lance la partie
-        startGame() {
-            this.time = 20
-            this.startTimer()
-            console.log(this.seriePlayed)
-            this.isStarted = true
-
-            axios
-                .post('http://localhost:8080/partie/' + this.seriePlayed,
-                    {
-                        joueur: "test",
-                    },
-                    {
-                        headers:
-                            { 'Content-Type': 'application/json' },
+        getPartie() {
+            let url = 'http://localhost:8080/partie/' + this.id;
+            return new Promise(function (resolve, reject) {
+                axios
+                    .get(url,
+                        {
+                            headers:
+                            {
+                                'Content-Type': 'application/json',
+                                'token': this.token
+                            }
+                            , proxy:
+                            {
+                                host: 'http://www-cache.iutnc.univ-lorraine.fr',
+                                port: 3128
+                            }
+                        })
+                    .then(response => {
+                        resolve(response);
                     })
-                .then(response => {
-                    this.token = response.data.token
-                    this.idPartie = response.data.id
-                    console.log(this.token)
-                })
-                .catch(e => {
-                    this.errors.push(e)
-                })
+                    .catch(error => {
+                        reject(error);
+                    })
+            })
+        },
+
+        startGame() {
+            if (this.seriePlayed == null || this.pseudo == null) {
+                this.erreur = true;
+            }
+            else {
+                //console.log("TEST" )
+                console.log("série: " + this.seriePlayed);
+                this.time = 20;
+                this.startTimer();
+                //console.log(this.seriePlayed)
+                this.isStarted = true;
+
+                this.partiePost(this.pseudo)
+                    .then(response => {
+                        this.id = response.data.id;
+                        this.token = response.data.token;
+                        console.log("id :" + this.id);
+                        console.log("token: " + this.token);
+                        console.log("réponse POST: ", response);
+                        let url = 'http://localhost:8080/partie/' + this.id;
+                        axios
+                            .get(url,
+                                {
+                                    headers:
+                                    {
+                                        'Content-Type': 'application/json',
+                                        'token': this.token
+                                    }
+                                    , proxy:
+                                    {
+                                        host: 'http://www-cache.iutnc.univ-lorraine.fr',
+                                        port: 3128
+                                    }
+                                })
+                            .then(response => {
+                                //resolve(response);
+                                this.lat1 = response.data.serie.lat1
+                                this.long1 = response.data.serie.lon1
+                                this.lat2 = response.data.serie.lat2
+                                this.long2 = response.data.serie.lon2
+                                this.listePhotos = response.data.photo
+                                console.log("lat1: "+this.lat1)
+                                console.log("réponse getPartie:", response);
+                                setTimeout(() => this.initMap(
+                                    [
+                                        [
+                                            parseFloat(new Array(
+                                                new Array(this.lat1, this.long1),
+                                                new Array(this.lat2, this.long2)
+                                            )
+                                            ),
+                                            parseFloat(this.long1)
+                                        ],
+                                        [
+                                            parseFloat(this.lat2),
+                                            parseFloat(this.long2)
+                                        ]
+                                    ]), 1);
+
+                            })
+                            .catch(error => {
+                                //  reject(error);
+                                console.log("Erreur getPartie(): ", error);
+                            })
+                    })
+                    .catch(error => {
+                        console.log("Erreur partiePost(): ", error);
+                    })
+            }
         },
 
         //Valide la réponse du joueur
@@ -243,7 +299,7 @@ var app = new Vue({
             }
             this.map.remove()
             setTimeout(this.initMap(), 1)
-            console.log("MAP : " + this.map)
+            //console.log("MAP : " + this.map)
         },
 
         //Met à jour le score du joueur
@@ -307,17 +363,17 @@ var app = new Vue({
         saveScore() {
             axios
                 .put('http://localhost:8080/partie/' + this.idPartie,
-                {
-                    "score": "" + this.score
-                },
                     {
-                        headers: { "Content-Type": "application/json" },
+                        "score": "" + this.score
+                    },
+                    {
+                        headers: { "Content-Type": "application/json" /*, "token": this.token */ },
                     })
-                    .then(response => {
-                    })
-                    .catch(e => {
-                        this.errors.push(e)
-                    })
+                .then(response => {
+                })
+                .catch(e => {
+                    this.errors.push(e)
+                })
             this.backHome()
         },
 
