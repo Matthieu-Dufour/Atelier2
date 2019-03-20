@@ -16,7 +16,8 @@ Vue.component('series', {
         `
         <p>
         <label for="serie">Choisissez une série</label>
-        <select name="serie" @change="getIDCity($event)" v-model="idSerie">
+        </br>
+        <select class="mdb-select md-form colorful-select dropdown-primary" name="serie" @change="getIDCity($event)" v-model="idSerie">
             <option disabled value="">Choisissez</option>
             <option v-for="s in nbseries" :value="s.id">{{s.ville}}</option>
         </select>
@@ -31,7 +32,8 @@ Vue.component('photos', {
         `
         <div>
             <img :src="'.'+urlphoto.url">
-            <button v-on:click="$emit('valider')">Valider</button>
+            </br></br>
+            <button class="btn btn-primary" v-on:click="$emit('valider')">Valider</button>
         </div>
         `,
     props: ['urlphoto'],
@@ -44,6 +46,9 @@ var app = new Vue({
     el: "#application",
 
     data: {
+
+        host: "localhost",
+
         errors: [],
         pseudo: null,
         age: null,
@@ -146,7 +151,7 @@ var app = new Vue({
 
         getAllSeries() {
             axios
-                .get('http://localhost:8081/series',
+                .get('http://'+this.host+':8081/series',
                     {
                         headers:
                             { 'Access-Control-Allow-Origin': 'http://localhost:8081/series' }
@@ -167,7 +172,7 @@ var app = new Vue({
         },
 
         partiePost(pseudo) {
-            let url = 'http://localhost:8080/partie/' + this.seriePlayed;
+            let url = 'http://'+this.host+':8080/partie/' + this.seriePlayed;
             return new Promise(function (resolve, reject) {
                 console.log("pseudo: " + app.$data.pseudo);
                 axios
@@ -192,7 +197,7 @@ var app = new Vue({
         },
 
         getPartie() {
-            let url = 'http://localhost:8080/partie/' + this.id;
+            let url = 'http://'+this.host+':8080/partie/' + this.id;
             return new Promise(function (resolve, reject) {
                 axios
                     .get(url,
@@ -236,7 +241,7 @@ var app = new Vue({
                         console.log("id :" + this.id);
                         console.log("token: " + this.token);
                         console.log("réponse POST: ", response);
-                        let url = 'http://localhost:8080/partie/' + this.id;
+                        let url = 'http://'+this.host+':8080/partie/' + this.id;
                         axios
                             .get(url,
                                 {
@@ -390,7 +395,7 @@ var app = new Vue({
         saveScore() {
             console.log("idPartie: " + this.id)
             axios
-                .put('http://localhost:8080/partie/' + this.id,
+                .put('http://'+this.host+':8080/partie/' + this.id,
                     {
                         "score": "" + this.score,
                         "status": "stop"
