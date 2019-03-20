@@ -376,7 +376,14 @@ var app = new Vue({
 
         //Retour au menu de sélection
         backHome() {
-            this.isStarted = false
+            this.isStarted = false;
+            this.compteurPhotos = 0;
+            this.listePhotos = [];
+            this.token = '';
+            this.idPartie = '';
+            this.seriePlayed = '';
+            this.score = 0;
+            this.pseudo = null;
         },
 
         //Sauvegarde le score du joueur
