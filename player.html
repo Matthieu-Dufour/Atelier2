@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="player.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.2.0/dist/leaflet.css">
 
+    <script src="https://npmcdn.com/leaflet-geometryutil"></script>
+
 </head>
 
 <body>
@@ -25,7 +27,7 @@
                 <!--AFFICHAGE DU JEU-->
                 <section v-if="isStarted">
                     <!--PARTIE EN COURS-->
-                    <div v-if="this.compteurPhotos < 11">
+                    <div v-if="this.compteurPhotos < 10 && this.over == false">
                         <photos v-bind:urlphoto="listePhotos[compteurPhotos]" v-on:valider="validChoice">
                         </photos>
                         <p>Votre score: {{this.score}}</p>
@@ -33,14 +35,13 @@
                             <h1>Timer</h1>
                             <p>{{this.time}} secondes restantes</p>
                         </div>
-                        <!--PARTIE TERMINEE-->
                         <div v-else>
                             <h1>Timer</h1>
                             <p>Temps écoulé, t'auras pas les points CHEH !</p>
                         </div>
 
                     </div>
-
+                    <!--PARTIE TERMINEE-->
                     <div v-else>
                         <p>Partie terminée</p>
                         <p>votre score est de {{this.score}}, voulez-vous l'enregistrer ?</p>
@@ -71,11 +72,8 @@
             </div>
             <!--MAP-->
             <div class="col-md-6">
-                <div v-show="isStarted && this.compteurPhotos < 11" class="row">
-                    <!-- <div class="col-md-9"> -->
-                        <!-- The map goes here -->
-                        <div id="map" class="map" v-on:click="getClick"></div>
-                    <!-- </div> -->
+                <div v-show="isStarted && this.compteurPhotos < 11 && this.over == false" class="row">
+                    <div id="map" class="map" v-on:click="getClickPosition"></div>
                 </div>
             </div>
 

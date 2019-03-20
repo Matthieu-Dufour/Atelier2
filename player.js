@@ -26,10 +26,11 @@ Vue.component('series', {
 })
 
 Vue.component('photos', {
+    
     template:
         `
         <div>
-            <img :src="urlphoto.url">
+            <img :src="'.'+urlphoto.url">
             <button v-on:click="$emit('valider')">Valider</button>
         </div>
         `,
@@ -54,20 +55,7 @@ var app = new Vue({
         listeSeries: [],
 
         compteurPhotos: 0,
-        listePhotos: [
-            {
-                "id": "1",
-                "desc": "ça existe",
-                "position": "ici",
-                "url": "BD.png"
-            },
-            {
-                "id": "2",
-                "desc": "ça existe",
-                "position": "ici",
-                "url": "nativescript1.png"
-            }
-        ],
+        listePhotos: [],
         erreur: false,
         token: '',
         idPartie: '',
@@ -76,6 +64,7 @@ var app = new Vue({
         score: 0,
         click: '',
         timer: 0,
+        over: false,
 
         //TIMER
         isRunning: false,
@@ -89,6 +78,10 @@ var app = new Vue({
         long1: '',
         lat2: '',
         long1: '',
+        mapMarker: null,
+        ajoutLatitude: null,
+        ajoutLongitude: null,
+        photoPos: null,
 
         map: null,
         tileLayer: null,
@@ -125,25 +118,31 @@ var app = new Vue({
 
         getIdSerie(id) {
             this.seriePlayed = id
-            //console.log(this.seriePlayed)
         },
 
 
-        getClick() {
-            //affichage position du clic
-            this.map.on('click', function (e) {
-                this.click = e.latlng.lat + ", " + e.latlng.lng;
-                //console.log(this.click)
-            })
+        getClickPosition(event) {
+            /* Retourne la position du click sur la map photo */
+            var latlng = this.map.mouseEventToLatLng(event);
+            this.ajoutLatitude = latlng.lat;
+            this.ajoutLongitude = latlng.lng;
+            if (this.mapMarker == null) {
+                this.mapMarker = new L.marker([this.ajoutLatitude, this.ajoutLongitude]);
+                this.mapMarker.addTo(this.map);
+            } else {
+                this.mapMarker.setLatLng([this.ajoutLatitude, this.ajoutLongitude]);
+            }
+            this.click = L.latLng([this.ajoutLatitude, this.ajoutLongitude]);
+            console.log("click: " + this.click);
         },
 
-        checkForm: function (e) {
-            if (this.pseudo && this.serie) return true;
-            this.errors = [];
-            if (!this.pseudo) this.errors.push("Un pseudo est requis.");
-            if (!this.serie) this.errors.push("Veuillez choisir une série.");
-            e.preventDefault();
-        },
+        // getClick() {
+        //     //affichage position du clic
+        //     this.map.on('click', function (e) {
+        //         this.click = e.latlng.lat + ", " + e.latlng.lng;
+        //         console.log("Click: " + this.click);
+        //     })
+        // },
 
         getAllSeries() {
             axios
@@ -219,6 +218,7 @@ var app = new Vue({
         },
 
         startGame() {
+            console.log("over: "+this.over)
             if (this.seriePlayed == null || this.pseudo == null) {
                 this.erreur = true;
             }
@@ -227,7 +227,6 @@ var app = new Vue({
                 console.log("série: " + this.seriePlayed);
                 this.time = 20;
                 this.startTimer();
-                //console.log(this.seriePlayed)
                 this.isStarted = true;
 
                 this.partiePost(this.pseudo)
@@ -253,13 +252,13 @@ var app = new Vue({
                                     }
                                 })
                             .then(response => {
-                                //resolve(response);
-                                this.lat1 = response.data.serie.lat1
-                                this.long1 = response.data.serie.lon1
-                                this.lat2 = response.data.serie.lat2
-                                this.long2 = response.data.serie.lon2
-                                this.listePhotos = response.data.photo
-                                console.log("lat1: "+this.lat1)
+                                this.lat1 = response.data.serie.lat1;
+                                this.long1 = response.data.serie.lon1;
+                                this.lat2 = response.data.serie.lat2;
+                                this.long2 = response.data.serie.lon2;
+                                this.dist = response.data.serie.dist;
+                                this.listePhotos = response.data.photo;
+                                console.log("lat1: " + this.lat1);
                                 console.log("réponse getPartie:", response);
                                 setTimeout(() => this.initMap(
                                     [
@@ -276,10 +275,9 @@ var app = new Vue({
                                             parseFloat(this.long2)
                                         ]
                                     ]), 1);
-
+                                console.log("liste photos: " ,this.listePhotos)
                             })
                             .catch(error => {
-                                //  reject(error);
                                 console.log("Erreur getPartie(): ", error);
                             })
                     })
@@ -291,20 +289,41 @@ var app = new Vue({
 
         //Valide la réponse du joueur
         validChoice() {
-            this.time = 20
-            if (this.compteurPhotos < 11) {
-                this.compteurPhotos++
+            this.time = 20;
+            if (this.compteurPhotos < 10) {
+                this.compteurPhotos++;
+                console.log("compteurPhoto: " + this.compteurPhotos)
                 this.calculScore()
-                this.startTimer()
+                this.startTimer();
+                this.map.remove();
+                setTimeout(() => this.initMap(
+                    [
+                        [
+                            parseFloat(new Array(
+                                new Array(this.lat1, this.long1),
+                                new Array(this.lat2, this.long2)
+                            )
+                            ),
+                            parseFloat(this.long1)
+                        ],
+                        [
+                            parseFloat(this.lat2),
+                            parseFloat(this.long2)
+                        ]
+                    ]), 1);
+                this.over = false;
             }
-            this.map.remove()
-            setTimeout(this.initMap(), 1)
-            //console.log("MAP : " + this.map)
+            if(this.compteurPhotos >= 10){
+                this.over = true;
+            }
         },
 
         //Met à jour le score du joueur
         calculScore() {
-            if (this.click < this.listePhotos[this.compteurPhotos].dist) {
+            let photoLat = this.listePhotos[this.compteurPhotos-1].lat;
+            let photoLon = this.listePhotos[this.compteurPhotos-1].lon;
+            this.photoPos = L.latLng([photoLat, photoLon]);
+            if (L.GeometryUtil.length([this.click, this.photoPos]) < this.dist) {
                 points = 5
                 if (this.time >= 15) {
                     point *= 4
@@ -320,7 +339,7 @@ var app = new Vue({
                 }
                 this.score += points
             }
-            if (this.click < (this.listePhotos[this.compteurPhotos].dist) * 2) {
+            if ((L.GeometryUtil.length([this.click, this.photoPos]) > this.dist) && (L.GeometryUtil.length([this.click, this.photoPos]) < (this.dist * 2))) {
                 points = 3
                 if (this.time >= 15) {
                     point *= 4
@@ -336,7 +355,7 @@ var app = new Vue({
                 }
                 this.score += points
             }
-            if (this.click < (this.listePhotos[this.compteurPhotos].dist) * 3) {
+            if ((L.GeometryUtil.length([this.click, this.photoPos]) > (this.dist*2)) && (L.GeometryUtil.length([this.click, this.photoPos]) < (this.dist *3))) {
                 points = 1
                 if (this.time >= 15) {
                     point *= 4
